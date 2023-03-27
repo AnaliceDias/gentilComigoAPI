@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model usuario {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  nomeDoUsuario   String
+  senha   String
+
+  registos      registro[]
+
+  @@map("usuarios")
+}
+
+model emocoesPrimarias{
+  id         Int      @id   @unique
+  emocao     String
+
+  emocoesSecundarias      emocoesSecundarias[]
+}
+
+model emocoesSecundarias{
+  id         Int      @id   @unique
+  emocao     String
+  emocaoPrimaria    emocoesPrimarias @relation(fields: [idEmocaoPrimaria] , references: [id])
+  idEmocaoPrimaria  Int
+
+  emocoesTerciarias      emocoesTerciarias[]
+}
+
+model emocoesTerciarias{
+  id         Int      @id  @unique
+  emocao     String  
+  emocaoSecundaria    emocoesSecundarias @relation(fields: [idEmocaoSecundaria] , references: [id])
+  idEmocaoSecundaria  Int
+
+  registos      registro[]
+}
+
+model registro {
+  id         Int      @id @default(autoincrement())   
+  usuario    usuario @relation(fields: [idUsuario] , references: [id])
+  idUsuario  Int
+  emocao    emocoesTerciarias @relation(fields: [idEmocao] , references: [id])
+  idEmocao  Int
+  anotacao   String @default("")
+  created_at DateTime @default(now())
+
+  @@map("registros")
+}
+
